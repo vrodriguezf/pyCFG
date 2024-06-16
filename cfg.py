@@ -526,13 +526,23 @@ class CFG(object):
             if len(rule_variables) == 2:
                 p2.add(rule)
             else:
+                # VICTOR: Fix previous bug with |rhs| >=4 
                 new_vars = [new_var() for _ in range(len(rule_variables) - 2)]
-                p2.add((rule[0], rule_variables.pop(0) + new_vars[-1]))
-                for i in range(len(new_vars) - 2):
-                    p2.add((new_vars[i], new_vars.pop(0) + new_vars[i + 1]))
+                p2.add((rule[0], rule_variables.pop(0) + new_vars[0]))
+                for i in range(len(new_vars) - 1):
+                    p2.add((new_vars[i], new_vars[i] + new_vars[i + 1]))
                 a = rule_variables.pop()
                 b = rule_variables.pop()
                 p2.add((new_vars[-1], b + a))
+
+                # new_vars = [new_var() for _ in range(len(rule_variables) - 2)]
+                # p2.add((rule[0], rule_variables.pop(0) + new_vars[-1]))
+                # for i in range(len(new_vars) - 2):
+                #     p2.add((new_vars[i], new_vars.pop(0) + new_vars[i + 1]))
+                # a = rule_variables.pop()
+                # b = rule_variables.pop()
+                # p2.add((new_vars[-1], b + a))
+
                 v1 |= set(new_vars)
 
         self._variables = frozenset(v1)

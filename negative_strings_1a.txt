@@ -1,0 +1,14 @@
+ab
+cab
+abcc
+ccab
+a
+aa
+b
+bb
+ba
+bca
+aacb
+ac
+bc
+acbbbaa

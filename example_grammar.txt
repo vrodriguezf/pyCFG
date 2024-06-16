@@ -1,7 +1,7 @@
-Variables: S,X,Y
-Terminals: a,b,c,ε
+Variables: S,A,B
+Terminals: 0,1,ε
 Start: S
 Null: ε
-S -> aX | ε
-X -> aX | cY | ε
-Y -> bY | aX | ε
+S -> A | ε
+A -> 0B1 | 0B0 | 1B1 | 1B0
+B -> 0S1 | 0S0 | 1S1 | 1S0
