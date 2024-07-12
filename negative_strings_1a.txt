@@ -9,3 +9,5 @@ aba
 bab
 abaabb
 aabbab
+abbaab
+aababb
