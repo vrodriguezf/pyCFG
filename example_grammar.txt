@@ -1,7 +1,5 @@
-Variables: S,A,B
-Terminals: 0,1,ε
+Variables: S
+Terminals: 0,2,1,ε
 Start: S
 Null: ε
-S -> A | ε
-A -> 0B1 | 0B0 | 1B1 | 1B0
-B -> 0S1 | 0S0 | 1S1 | 1S0
+S -> SS | 0S2 | 0S21 | ε

@@ -10,7 +10,7 @@ def read_grammar(file_path):
     with open(file_path, 'r') as file:
         lines = file.readlines()
         # BOTCH: This is a hack to make 0's and 1's as a's or b's, a bug in cfg
-        lines = [re.sub(r'0', 'a', re.sub(r'1', 'b', line)) for line in lines]
+        lines = [re.sub(r'0', 'a', re.sub(r'1', 'b', re.sub(r'2', 'c', line))) for line in lines]
     
     variables = set()
     terminals = set()
@@ -57,7 +57,8 @@ def main(grammar_file, positive_strings_file=None, negative_strings_file=None):
             else:
                 # BOTCH: This is a hack to make 0's and 1's as a's or b's, a bug in cfg
                 p_strings_for_show["Is Accepted"].append(
-                    g.cyk(re.sub(r'0', 'a', re.sub(r'1', 'b', p_string))))
+                    g.cyk(re.sub(r'0', 'a', re.sub(r'1', 'b', re.sub(r'2', 'c', p_string))))
+                )
             #p_strings_for_show["Is Accepted"].append(g.cyk(p_string))
         p_strings_df = pd.DataFrame(p_strings_for_show)
         print(f"\nPositive Tests:\n{tabulate(p_strings_df, headers='keys', tablefmt='fancy_grid')}")
@@ -73,7 +74,7 @@ def main(grammar_file, positive_strings_file=None, negative_strings_file=None):
             else:
                 # BOTCH: This is a hack to make 0's and 1's as a's or b's, a bug in cfg
                 n_strings_for_show["Is Rejected"].append(
-                    not g.cyk(re.sub(r'0', 'a', re.sub(r'1', 'b', n_string)))
+                    not g.cyk(re.sub(r'0', 'a', re.sub(r'1', 'b', re.sub(r'2', 'c', n_string))))
                 )
             # n_strings_for_show["Is Rejected"].append(not g.cyk(n_string))
         n_strings_df = pd.DataFrame(n_strings_for_show)
