@@ -64,6 +64,32 @@ class CFG(object):
     Context free grammar (CFG) class
     """
 
+    def is_chamsky(self, *, recompute=False):
+        """
+        Return True iff the grammar is in CNF.
+        Set recompute=True to force a fresh test even if _is_chamsky is cached.
+        """
+        if self._is_chamsky is None or recompute:
+            v, t, n = self.variables, self.terminals, self.null_character
+            pat = re.compile('|'.join(re_escaped(v | t)))
+            def ok(rule):
+                lhs, rhs = rule
+                # S -> λ allowed
+                if rhs == n:
+                    return lhs == self.start_variable
+                # tokenise RHS
+                toks = pat.findall(rhs)
+                if ''.join(toks) != rhs:
+                    return False                         # malformed RHS
+                if len(toks) == 1 and toks[0] in t:      # A → a
+                    return True
+                if len(toks) == 2 and toks[0] in v and toks[1] in v:   # A → BC
+                    return True
+                return False
+
+            self._is_chamsky = all(ok(r) for r in self.rules)
+        return self._is_chamsky
+
     def __init__(self,
                  variables=None,
                  terminals=None,
