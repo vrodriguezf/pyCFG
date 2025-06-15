@@ -595,6 +595,51 @@ class CFG(object):
             return True
         return False
 
+    def cyk_matrix(self, string, *, return_table=False):
+        """
+        CYK algorithm, but if return_table is True, returns (accepted, V) where V is the CYK matrix.
+        """
+        string = string.strip()
+
+        if not self._is_chamsky:
+            if not self._cnf:
+                self._cnf = copy(self)
+                self._cnf.chamsky()
+            self = self._cnf
+
+        if string == '':
+            if self.accepts_null:
+                return (True, []) if return_table else True
+            return (False, []) if return_table else False
+
+        if string == self.null_character:
+            return (False, []) if return_table else False
+
+        V = [[set() if i != j else {rule[0] for rule in self.rules if rule[1] == string[i]}
+              for j in range(len(string))]
+             for i in range(len(string))]
+
+        variables_pattern = re.compile('|'.join(re_escaped(self.variables)))
+
+        def Vij(i, j):
+            nonlocal V
+            for k in range(i, j):
+                for rule in self.rules:
+                    rule_variables = variables_pattern.findall(rule[1])
+                    if len(rule_variables) == 2:
+                        if rule_variables[0] in V[i][k] and rule_variables[1] in V[k + 1][j]:
+                            V[i][j].add(rule[0])
+
+        for j in range(len(string) - 1):
+            for i in range(len(string)):
+                if i + 1 + j < len(string):
+                    Vij(i, i + 1 + j)
+
+        accepted = self.start_variable in V[0][-1]
+        if return_table:
+            return accepted, V
+        return accepted
+
     def str_rules(self, *, return_list=False, prepend='', line_splitter='\n'):
         """
         Returns a human-readable string representation of grammar's rules
