@@ -1,7 +1,8 @@
-Variables: S,A,B
-Terminals: 0,1,2,ε
+Variables: S,X,Y,Z
+Terminals: a,b,c,d,ε
 Start: S
 Null: ε
-S -> 0A2B | ε
-A -> 0A2B | 02BA | ε
-B -> 1 | ε
+S -> aSd | XYZ
+X -> aXb | ε
+Y -> bYc | ε
+Z -> cZd | ε

@@ -1,0 +1,17 @@
+ε
+a
+ac
+aacc
+b
+bb
+c
+cc
+ccc
+abab
+cababa
+cb
+aac
+caaca
+abcaaca
+aa
+aaa
