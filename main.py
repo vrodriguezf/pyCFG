@@ -45,6 +45,9 @@ def main(grammar_file, positive_strings_file=None, negative_strings_file=None):
     g = read_grammar(grammar_file)
     print("---- GRAMMAR ----")
     print(g)
+
+    # Indicate if the grammar is in Chomsky Normal Form
+    print(f"Chomsky Normal Form: {'Yes' if getattr(g, '_is_chamsky', False) else 'No'}")
     
     if positive_strings_file:
         with open(positive_strings_file, 'r') as file:
