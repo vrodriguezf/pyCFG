@@ -1,8 +1,15 @@
-Variables: S,X,Y,Z
+Variables: S,A,B,C,D,E,F,W,X,Y,Z
 Terminals: a,b,c,d,ε
 Start: S
 Null: ε
-S -> aSd | XYZ
-X -> aXb | ε
-Y -> bYc | ε
-Z -> cZd | ε
+S -> AS | BD | CZ | BX
+A -> WE | WW
+B -> AF | BX | AX
+C -> YC | c
+D -> CZ
+E -> AW
+F -> BX
+W -> a
+X -> b
+Y -> c
+Z -> d

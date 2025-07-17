@@ -49,6 +49,9 @@ def main(grammar_file, positive_strings_file=None, negative_strings_file=None):
     # Indicate if the grammar is in Chomsky Normal Form
     print(f"Chomsky Normal Form: {'Yes' if g.is_chamsky() else 'No'}")
     
+    # Indicate if the grammar is regular
+    print(f"Regular Grammar: {'Yes' if g.is_regular() else 'No'}")
+    
     if positive_strings_file:
         with open(positive_strings_file, 'r') as file:
             p_strings = [line.strip() for line in file if line.strip()]

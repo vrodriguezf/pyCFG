@@ -90,6 +90,46 @@ class CFG(object):
             self._is_chamsky = all(ok(r) for r in self.rules)
         return self._is_chamsky
 
+    def is_regular(self):
+        """
+        Return True if the grammar is regular (right-linear or left-linear).
+        """
+        if not self.variables or not self.terminals:
+            return True
+            
+        right_linear = True
+        left_linear = True
+        
+        # Create patterns for variables and terminals (excluding null character)
+        v_pattern = '|'.join(re.escape(v) for v in self.variables)
+        t_pattern = '|'.join(re.escape(t) for t in self.terminals if t != self.null_character)
+        
+        if not t_pattern:  # No non-null terminals
+            t_pattern = '(?!.)'  # Pattern that never matches
+        
+        for lhs, rhs in self.rules:
+            # Skip null rules - they're allowed in regular grammars
+            if rhs == self.null_character:
+                continue
+                
+            # Check right-linear: should be (terminals)*(variable)? or just terminals
+            # Patterns: a, ab, abc, aS, abS, abcS, etc.
+            right_pattern = f'({t_pattern})*({v_pattern})?'
+            if not re.fullmatch(right_pattern, rhs):
+                right_linear = False
+                
+            # Check left-linear: should be (variable)?(terminals)* or just terminals
+            # Patterns: a, ab, abc, Sa, Sab, Sabc, etc.
+            left_pattern = f'({v_pattern})?({t_pattern})*'
+            if not re.fullmatch(left_pattern, rhs):
+                left_linear = False
+                
+            # Early exit if neither pattern works
+            if not right_linear and not left_linear:
+                return False
+        
+        return right_linear or left_linear
+
     def __init__(self,
                  variables=None,
                  terminals=None,
