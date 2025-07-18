@@ -753,7 +753,7 @@ class CFG(object):
 
     def is_ll1(self):
         """
-        Return True if the grammar is LL(1).
+        Return (True, None) if the grammar is LL(1), or (False, reason) if not.
         """
         # Compute FIRST sets for all variables and strings
         first_sets = self._compute_first_sets()
@@ -777,17 +777,19 @@ class CFG(object):
                     first_j_no_null = first_j - {self.null_character}
                     
                     if first_i_no_null & first_j_no_null:
-                        return False
+                        intersection = first_i_no_null & first_j_no_null
+                        return False, f"FIRST/FIRST conflict for {variable}: productions '{productions[i]}' and '{productions[j]}' both start with {intersection}"
             
             # Check FIRST/FOLLOW condition
             for production in productions:
                 first_prod = self._first_of_string(production, first_sets)
                 if self.null_character in first_prod:
                     first_prod_no_null = first_prod - {self.null_character}
-                    if first_prod_no_null & follow_sets[variable]:
-                        return False
+                    intersection = first_prod_no_null & follow_sets[variable]
+                    if intersection:
+                        return False, f"FIRST/FOLLOW conflict for {variable}: production '{production}' has FIRST ∩ FOLLOW = {intersection}"
         
-        return True
+        return True, None
 
     def _compute_first_sets(self):
         """

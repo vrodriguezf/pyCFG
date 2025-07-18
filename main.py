@@ -52,8 +52,12 @@ def main(grammar_file, positive_strings_file=None, negative_strings_file=None):
     # Indicate if the grammar is regular
     print(f"Regular Grammar: {'Yes' if g.is_regular() else 'No'}")
 
-    # Indicate if the grammar is LL(1)
-    print(f"LL(1) Grammar: {'Yes' if g.is_ll1() else 'No'}")
+    # Check if the grammar is LL(1) and get reason if not
+    is_ll1_result, ll1_reason = g.is_ll1()
+    if is_ll1_result:
+        print("LL(1) Grammar: Yes")
+    else:
+        print(f"LL(1) Grammar: No ({ll1_reason})")
     
     if positive_strings_file:
         with open(positive_strings_file, 'r') as file:
