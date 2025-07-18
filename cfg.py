@@ -750,3 +750,151 @@ class CFG(object):
         print_lines.extend(self.str_rules(return_list=True, prepend='\t'))
 
         return "\n".join(print_lines)
+
+    def is_ll1(self):
+        """
+        Return True if the grammar is LL(1).
+        """
+        # Compute FIRST sets for all variables and strings
+        first_sets = self._compute_first_sets()
+        
+        # Compute FOLLOW sets for all variables  
+        follow_sets = self._compute_follow_sets(first_sets)
+        
+        # Check LL(1) conditions
+        for variable in self.variables:
+            # Get all productions for this variable
+            productions = [rule[1] for rule in self.rules if rule[0] == variable]
+            
+            # Check FIRST/FIRST condition
+            for i in range(len(productions)):
+                for j in range(i + 1, len(productions)):
+                    first_i = self._first_of_string(productions[i], first_sets)
+                    first_j = self._first_of_string(productions[j], first_sets)
+                    
+                    # Remove null character for intersection check
+                    first_i_no_null = first_i - {self.null_character}
+                    first_j_no_null = first_j - {self.null_character}
+                    
+                    if first_i_no_null & first_j_no_null:
+                        return False
+            
+            # Check FIRST/FOLLOW condition
+            for production in productions:
+                first_prod = self._first_of_string(production, first_sets)
+                if self.null_character in first_prod:
+                    first_prod_no_null = first_prod - {self.null_character}
+                    if first_prod_no_null & follow_sets[variable]:
+                        return False
+        
+        return True
+
+    def _compute_first_sets(self):
+        """
+        Compute FIRST sets for all variables.
+        """
+        first = {var: set() for var in self.variables}
+        
+        # Add terminals to their own FIRST sets
+        for terminal in self.terminals:
+            first[terminal] = {terminal}
+        
+        changed = True
+        while changed:
+            changed = False
+            for var in self.variables:
+                old_size = len(first[var])
+                
+                for rule in self.rules:
+                    if rule[0] == var:
+                        rhs = rule[1]
+                        first_rhs = self._first_of_string(rhs, first)
+                        first[var] |= first_rhs
+                
+                if len(first[var]) > old_size:
+                    changed = True
+        
+        return first
+
+    def _compute_follow_sets(self, first_sets):
+        """
+        Compute FOLLOW sets for all variables.
+        """
+        follow = {var: set() for var in self.variables}
+        follow[self.start_variable].add('$')  # End of input marker
+        
+        changed = True
+        while changed:
+            changed = False
+            for rule in self.rules:
+                lhs, rhs = rule
+                
+                # Find all variables in RHS
+                variables_pattern = re.compile('|'.join(re.escape(v) for v in self.variables))
+                var_positions = []
+                pos = 0
+                while pos < len(rhs):
+                    match = variables_pattern.match(rhs, pos)
+                    if match:
+                        var_positions.append((match.group(), pos, match.end()))
+                        pos = match.end()
+                    else:
+                        pos += 1
+                
+                for var, start_pos, end_pos in var_positions:
+                    old_size = len(follow[var])
+                    
+                    # Get the string after this variable
+                    beta = rhs[end_pos:]
+                    
+                    if beta:
+                        first_beta = self._first_of_string(beta, first_sets)
+                        follow[var] |= first_beta - {self.null_character}
+                        
+                        if self.null_character in first_beta:
+                            follow[var] |= follow[lhs]
+                    else:
+                        follow[var] |= follow[lhs]
+                    
+                    if len(follow[var]) > old_size:
+                        changed = True
+        
+        return follow
+
+    def _first_of_string(self, string, first_sets):
+        """
+        Compute FIRST set of a string of variables and terminals.
+        """
+        if not string or string == self.null_character:
+            return {self.null_character}
+        
+        result = set()
+        
+        # Parse the string into symbols
+        symbols = []
+        pos = 0
+        pattern = re.compile('|'.join(re.escape(s) for s in (self.variables | self.terminals)))
+        
+        while pos < len(string):
+            match = pattern.match(string, pos)
+            if match:
+                symbols.append(match.group())
+                pos = match.end()
+            else:
+                return set()  # Invalid string
+        
+        for symbol in symbols:
+            if symbol in self.terminals:
+                result.add(symbol)
+                break
+            elif symbol in self.variables:
+                first_symbol = first_sets.get(symbol, set())
+                result |= first_symbol - {self.null_character}
+                
+                if self.null_character not in first_symbol:
+                    break
+        else:
+            # All symbols can derive null
+            result.add(self.null_character)
+        
+        return result
