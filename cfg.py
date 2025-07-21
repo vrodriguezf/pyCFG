@@ -900,3 +900,27 @@ class CFG(object):
             result.add(self.null_character)
         
         return result
+
+    def compute_predict_sets(self):
+        """
+        Compute PREDICT sets for all productions in the grammar.
+        Returns a dictionary mapping each rule (lhs, rhs) to its PREDICT set.
+        """
+        first_sets = self._compute_first_sets()
+        follow_sets = self._compute_follow_sets(first_sets)
+        
+        predict_sets = {}
+        
+        for rule in self.rules:
+            lhs, rhs = rule
+            first_rhs = self._first_of_string(rhs, first_sets)
+            
+            # PREDICT(A → α) = FIRST(α) - {ε} ∪ (FOLLOW(A) if ε ∈ FIRST(α))
+            predict_set = first_rhs - {self.null_character}
+            
+            if self.null_character in first_rhs:
+                predict_set |= follow_sets[lhs]
+            
+            predict_sets[rule] = predict_set
+        
+        return predict_sets
